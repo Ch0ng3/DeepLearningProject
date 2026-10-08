@@ -1,8 +1,13 @@
-# DeepLearningProject
-Project 5
-Márton Tamás Magyar    TG2UTM
-Daniel Brody           IASULA
-Marco Buonfantino      FMDKOH
+# DeepLearningProject - Project 5
+
+## Team Members
+
+| Name | Neptun Code |
+|---|---|
+| Márton Tamás Magyar | `TG2UTM` |
+| Daniel Brody | `IASULA` |
+| Marco Buonfantino | `FMDKOH` |
+
 # Specifications
 A classifier trained on photos should also recognise the same objects in paintings, cartoons and sketches, but most models cannot. You will compare backbones pretrained in different ways (supervised, self-supervised DINOv2, and language-supervised CLIP) using DomainBed. The dataset is PACS: 7 object classes in 4 styles, or "domains".
 
