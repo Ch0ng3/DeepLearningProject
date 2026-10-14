@@ -78,7 +78,7 @@ Every experiment of Milestone 2, including the early ones that are no longer par
 | E4 | | Same notebook: LoRA CLIP, full FT DINOv2/CLIP | – | – | replaced by the current grid |
 | E10 | 14 Oct 2026 | `M2_run_lp_dinov2` | 0 | 94.5 (A 97.8, C 92.4, P 99.9, S 87.7) | done; ECE 2.0%; ~5.5 min/run, 1.4 GB; matches `collect_results`; −0.6 vs E1 (run-to-run variation) |
 | E11 | 14 Oct 2026 | `M2_run_lp_clip` | 0 | 96.7 (A 96.8, C 98.5, P 99.4, S 92.1) | done; ECE 21.0% (under-confident); ~5 min/run, 1.3 GB; matches `collect_results`; +0.2 vs E2 |
-| E12 | | `M2_run_lora_dinov2` | 0 | | to run |
+| E12 | 14 Oct 2026 | `M2_run_lora_dinov2` | 0 | 94.5 (A 96.2, C 95.6, P 100.0, S 86.4) | done; same average as the linear probe (C +3.2, A −1.6, S −1.3); ECE 3.4% but over-confident on sketch (ECE 9.0%); ~7.8 min/run, 10.6 GB; best step 300–1200 |
 | E13 | | `M2_run_lora_clip` | 0 | | to run |
 | E14 | | `M2_run_fullft_dinov2` | 0 | | to run |
 | E15 | | `M2_run_fullft_clip` | 0 | | to run |
