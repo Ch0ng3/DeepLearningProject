@@ -16,10 +16,10 @@
 |---|---|---|
 | Milestone 1 – Reproduce | `Milestone_1/` | done: 84.9 vs. 85.5 in the paper (seed 0) |
 | Milestone 2 – Improve | `Milestone_2/` | notebooks ready, runs to do; protocol and experiment log in its README |
-| Milestone 3 – Research Contribution | `Milestone_3/` | plan and rules in its README |
+| Milestone 3 – Research Contribution | `Milestone_3/` | after Milestone 2 |
 | Final report (IEEE 2-column, max 6 pages) | `Report/` | skeleton ready |
 
-How the work follows the general guidelines below: model selection always on the training-domain validation set (the test domain is never used for selection or tuning); 3 seeds and mean ± std for Milestones 2 and 3, including a 3-seed re-run of the ResNet-50 baseline; one factor changed at a time with the same splits, and the cost of every method reported; every experiment recorded in the experiment log; logs and fine-tuned checkpoints backed up after every run; Colab's pre-installed PyTorch with only the missing packages installed; Kaggle supported as the alternative platform.
+How Milestone 2 follows the general guidelines below: one factor changed at a time (backbone or adaptation method), the same data split as Milestone 1 for every run, the computational budget of every method measured and reported, every experiment recorded in the experiment log (`Milestone_2/README.md`); results, logs and fine-tuned checkpoints saved after every run; Colab's pre-installed PyTorch with only the missing packages installed; Kaggle supported as the alternative platform. Model selection always uses the training-domain validation set.
 
 # Specifications
 A classifier trained on photos should also recognise the same objects in paintings, cartoons and sketches, but most models cannot. You will compare backbones pretrained in different ways (supervised, self-supervised DINOv2, and language-supervised CLIP) using DomainBed. The dataset is PACS: 7 object classes in 4 styles, or "domains".
