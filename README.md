@@ -19,7 +19,7 @@
 | Milestone 3 – Research Contribution | `Milestone_3/` | after Milestone 2 |
 | Final report (IEEE 2-column, max 6 pages) | `Report/` | skeleton ready |
 
-How Milestone 2 follows the general guidelines below: one factor changed at a time (backbone or adaptation method), the same data split as Milestone 1 for every run, the computational budget of every method measured and reported, every experiment recorded in the experiment log (`Milestone_2/README.md`); results, logs and fine-tuned checkpoints saved after every run; Colab's pre-installed PyTorch with only the missing packages installed; Kaggle supported as the alternative platform. Model selection always uses the training-domain validation set.
+How Milestone 2 follows the general guidelines below: one factor changed at a time (backbone or adaptation method), the same data split as Milestone 1 for every run, the computational budget of every method measured and reported, every experiment recorded in the experiment log (`Milestone_2/README.md`); results and logs of every run saved to Google Drive as soon as the run finishes; Colab's pre-installed PyTorch with only the missing packages installed; Kaggle supported as the alternative platform. Model selection always uses the training-domain validation set.
 
 # Specifications
 A classifier trained on photos should also recognise the same objects in paintings, cartoons and sketches, but most models cannot. You will compare backbones pretrained in different ways (supervised, self-supervised DINOv2, and language-supervised CLIP) using DomainBed. The dataset is PACS: 7 object classes in 4 styles, or "domains".
