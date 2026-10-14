@@ -26,5 +26,13 @@ ERM on PACS, held-out-domain accuracy with model selection by **training-domain 
 
 Each column is the accuracy on that domain when it is held out as the test domain. Our average of **84.9** is within ~0.6 points of the paper's 85.5.
 
+## Notes
+
+- **Single run, default hyperparameters.** One run per held-out domain (seed 0) with DomainBed's default ERM hyperparameters (lr 5e-5, batch size 32 per domain, weight decay 0, 5000 steps). The paper reports the best of a random hyperparameter search averaged over 3 trials, which explains the per-domain gaps (Art −2.2, Sketch −1.0). The `+/- 0.0` printed by `collect_results` does not mean zero variance: with a single trial the standard deviation cannot be estimated.
+- **Backbone.** `resnet50_augmix` is switched off, so the featurizer is torchvision's ImageNet-pretrained ResNet-50, as in the paper.
+- **Data.** The Google Drive download in DomainBed's script failed, so PACS was taken from the Hugging Face copy (`flwrlabs/pacs`), as allowed by the assignment. It has the same 9,991 images (art 2,048, cartoon 2,344, photo 1,670, sketch 3,929). Images were re-encoded as RGB JPEG (quality 95) into DomainBed's folder layout. For this reason we installed `wilds` and `datasets` (for the Hugging Face download) instead of `wilds` and `gdown`.
+- **Model selection.** All numbers use the training-domain validation set. The test-domain (oracle) selection, which peeks at the held-out domain, gives 85.3 on average and is not reported as a result.
+- **Compute.** Google Colab GPU, ~0.5 s per step, i.e. ~42 min per run and ~2.8 h for the four runs (see `Milestone1.ipynb`).
+
 
 
