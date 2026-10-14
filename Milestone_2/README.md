@@ -33,7 +33,7 @@ The general guidelines ask for controlled improvements: one major change at a ti
 | ERM ResNet-50 (baseline = Milestone 1 run) | all | 5e-5 | 5001 | DomainBed defaults, augmix off |
 | Linear probe | head only | 5e-5 (default) | 2000 | same settings as the first linear-probe runs (see the log) |
 | LoRA (rank 8, attention qkv + proj) | adapters + head (442,368 + head) | 5e-4 | 1500 | identical adapters on DINOv2 and CLIP |
-| Full fine-tuning | all | 1e-5, head ×10 | 1500 | the only method that saves checkpoints (needed for WiSE-FT in Milestone 3) |
+| Full fine-tuning | all | 1e-5, head ×10 | 1500 | |
 
 The computational budget is reported per method from the measurements (trainable parameters, peak VRAM, seconds per step, minutes per run) in the final table of `M2_results.ipynb`. The ViT methods use fewer steps than the ResNet baseline because the pretrained backbones converge much faster; the "best step" column of the table shows whether the selected checkpoint is close to the last one (which would mean more steps are needed).
 
@@ -53,22 +53,17 @@ One notebook per method × backbone (4 runs each: one per held-out domain, seed 
 
 Times are estimates (+ ~10 min setup per session; roughly double on Kaggle's P100/T4). In total about 5 hours of GPU time.
 
-1. Open a run notebook, choose `BACKUP` (section 1) and set `SESSION_BUDGET_MIN` (section 4) to how long you can stay, then *Run all*. No run is started that cannot finish within the budget.
-2. Next session: paste the `RESULT` lines printed so far into `PREVIOUS_RESULTS` (section 4) and *Run all* again: finished runs are skipped.
-3. When a notebook has all 4 runs, paste the output of its section 7 into `ALL_RESULTS` in `M2_results.ipynb`, and add a line to the experiment log below.
+1. Open a run notebook, set `SESSION_BUDGET_MIN` (section 4) to how long you can stay, then *Run all* (section 1 asks for Google Drive access). No run is started that cannot finish within the budget.
+2. Next session: *Run all* again: the runs already saved on Drive are skipped.
+3. When all notebooks are done, run `M2_results.ipynb` (it reads every run from Drive) and add the results to the experiment log below.
 
-### Saving results, logs and checkpoints
+### Saving results and logs
 
-Cloud sessions disconnect, so results are saved in three ways:
+Every finished run is saved immediately to **Google Drive** (`MyDrive/DeepLearningProject/M2_backup/<run>/`; on Kaggle to `/kaggle/working/M2_backup/`): `result.json` (the numbers of the run) and the DomainBed logs (`results.jsonl`, `out.txt`, `err.txt`). Section 1 asks once for Drive access.
 
-- **Results**: every finished run prints a `RESULT {...}` line in the notebook output (accuracy, selected step, confusion matrix, ECE, NLL, VRAM, time). Keep the notebooks saved with their outputs.
-- **Logs**: the DomainBed logs of every run (`results.jsonl`, `out.txt`, `err.txt`) are backed up according to `BACKUP`:
-  - `'download'` (default): on Colab, a zip with all logs is downloaded at the end of the session; on Kaggle, they are kept in `/kaggle/working`;
-  - `'drive'`: copied to `MyDrive/DeepLearningProject/M2_backup` (the course's recommendation for Colab);
-  - `'none'`: no backup.
-- **Checkpoints**: full fine-tuning only (the other methods leave the backbone frozen). They are saved as fp16 (~200 MB per run) and downloaded or copied with the logs.
-
-Put the downloaded zips and checkpoints in a shared folder of the team, not in git (they are too large).
+- In a later session the runs already on Drive are skipped automatically: just *Run all* again.
+- `M2_results.ipynb` reads all runs from Drive (runs made on Kaggle can be pasted as `RESULT` lines).
+- Model weights are not saved (not needed for Milestone 2); set `SAVE_CHECKPOINTS = True` in section 4 to save them (fp16, ~200 MB per run).
 
 ## Experiment log
 
