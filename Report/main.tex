@@ -1,0 +1,89 @@
+% Final report -- IEEE 2-column conference format, max 6 pages (course requirement).
+% Compile on Overleaf (IEEEtran is included there) or with any TeX distribution that has IEEEtran.
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\begin{document}
+
+\title{Supervised, Self-Supervised and Language-Supervised Backbones for Domain Generalization on PACS}
+
+\author{
+\IEEEauthorblockN{M\'arton Tam\'as Magyar (TG2UTM), Daniel Brody (IASULA), Marco Buonfantino (FMDKOH)}
+\IEEEauthorblockA{Budapest University of Technology and Economics -- Deep Learning, Project 5}
+}
+
+\maketitle
+
+\begin{abstract}
+\todo{4--6 sentences: problem (classifiers trained on photos fail on paintings, cartoons, sketches), what we did (reproduce ERM on PACS with DomainBed; compare ResNet-50, DINOv2 and CLIP backbones adapted by linear probing, LoRA and full fine-tuning; research question of Milestone 3), main numbers (mean $\pm$ std over 3 seeds), main conclusion.}
+\end{abstract}
+
+\section{Introduction}
+\todo{Domain generalization, PACS (7 classes, 4 domains), leave-one-domain-out protocol, why the pretraining of the backbone matters, contributions as a bullet list (one per milestone).}
+
+\section{Related Work}
+\todo{DomainBed and fair model selection~\cite{gulrajani2021domainbed}; PACS~\cite{li2017pacs}; DINOv2~\cite{oquab2023dinov2}; CLIP~\cite{radford2021clip}; LoRA~\cite{hu2022lora}; WiSE-FT~\cite{wortsman2022wiseft}.}
+
+\section{Method}
+\subsection{Protocol}
+All experiments use DomainBed with ERM on PACS, leave-one-domain-out (4 test domains), a 20\% hold-out of every domain, and model selection on the training-domain validation set; the test domain is never used for selection or tuning. Results are the test-domain accuracy of the selected checkpoint, as mean $\pm$ standard deviation over 3 seeds (trial seeds 0--2, identical splits for all methods).
+\subsection{Backbones and adaptation}
+\todo{ResNet-50 (ImageNet, supervised), DINOv2 ViT-B/14 (self-supervised; features = 4 CLS tokens + mean patch token), CLIP ViT-B/16 (language-supervised, LAION-2B, input renormalization). Linear probe; LoRA rank 8 on the attention projections (identical 442k parameters on both ViTs; parametrization for CLIP's MultiheadAttention); full fine-tuning with 10$\times$ head learning rate. Table of hyperparameters and steps.}
+
+\section{Milestone 1: Reproduction}
+\begin{table}[t]
+\centering
+\caption{ERM with ResNet-50 on PACS, training-domain validation (accuracy \%).}
+\label{tab:m1}
+\begin{tabular}{lccccc}
+\toprule
+ & A & C & P & S & Avg\\
+\midrule
+DomainBed paper~\cite{gulrajani2021domainbed} & 84.7 & 80.8 & 97.2 & 79.3 & 85.5\\
+Ours (seed 0) & 82.5 & 80.9 & 97.8 & 78.3 & 84.9\\
+Ours (3 seeds) & \todo{} & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+Our single run is within 0.6 points of the paper on average and within 2.2 points on every domain (Table~\ref{tab:m1}), inside the 1--3 point range expected from random initialization, library versions and the absence of the paper's hyperparameter search (we use the default hyperparameters). \todo{Discuss the 3-seed result and the per-domain differences (Art, Sketch).}
+
+\section{Milestone 2: Improving the Backbone}
+\begin{table*}[t]
+\centering
+\caption{Test-domain accuracy (\%, mean $\pm$ std over 3 seeds) and cost. \todo{fill from M2\_results.ipynb}}
+\label{tab:m2}
+\begin{tabular}{llccccccccc}
+\toprule
+Backbone & Adaptation & A & C & P & S & Avg & ECE & Trainable params & VRAM (GB) & s/step\\
+\midrule
+ResNet-50 & full (ERM) & & & & & & & & & \\
+DINOv2 & linear probe & & & & & & & & & \\
+DINOv2 & LoRA & & & & & & & & & \\
+DINOv2 & full FT & & & & & & & & & \\
+CLIP & zero-shot & & & & & & & 0 & & \\
+CLIP & linear probe & & & & & & & & & \\
+CLIP & LoRA & & & & & & & & & \\
+CLIP & full FT & & & & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table*}
+\todo{Effect of the backbone (one factor at a time), effect of the adaptation method, accuracy vs.\ cost, which differences exceed the seed std, computational budget of each method (steps, time).}
+
+\section{Milestone 3: Research Question}
+\todo{State the research question(s); WiSE-FT curve with $\alpha$ selected on training-domain validation; few-shot results; calibration (ECE, reliability). All with 3 seeds.}
+
+\section{Error Analysis and Limitations}
+\todo{Per-class accuracy and most frequent confusions per held-out domain (from the confusion matrices), example failures (e.g.\ sketches), over-confidence on the unseen domain; limitations: single dataset, no hyperparameter search, fewer steps for the ViTs, compute constraints.}
+
+\section{Conclusion}
+\todo{3--4 sentences.}
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

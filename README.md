@@ -8,6 +8,19 @@
 | Daniel Brody | `IASULA` |
 | Marco Buonfantino | `FMDKOH` |
 
+## Project Level and Status
+
+**Target level: Option B – Advanced Project** (Milestones 1, 2 and 3) – *to be confirmed by the team.*
+
+| Part | Folder | Status |
+|---|---|---|
+| Milestone 1 – Reproduce | `Milestone_1/` | done: 84.9 vs. 85.5 in the paper (seed 0) |
+| Milestone 2 – Improve | `Milestone_2/` | notebooks ready, runs to do; protocol and experiment log in its README |
+| Milestone 3 – Research Contribution | `Milestone_3/` | plan and rules in its README |
+| Final report (IEEE 2-column, max 6 pages) | `Report/` | skeleton ready |
+
+How the work follows the general guidelines below: model selection always on the training-domain validation set (the test domain is never used for selection or tuning); 3 seeds and mean ± std for Milestones 2 and 3, including a 3-seed re-run of the ResNet-50 baseline; one factor changed at a time with the same splits, and the cost of every method reported; every experiment recorded in the experiment log; logs and fine-tuned checkpoints backed up after every run; Colab's pre-installed PyTorch with only the missing packages installed; Kaggle supported as the alternative platform.
+
 # Specifications
 A classifier trained on photos should also recognise the same objects in paintings, cartoons and sketches, but most models cannot. You will compare backbones pretrained in different ways (supervised, self-supervised DINOv2, and language-supervised CLIP) using DomainBed. The dataset is PACS: 7 object classes in 4 styles, or "domains".
 
