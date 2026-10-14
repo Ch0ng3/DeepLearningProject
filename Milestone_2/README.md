@@ -73,11 +73,11 @@ Every experiment of Milestone 2, including the early ones that are no longer par
 |---|---|---|---|---|---|
 | E0 | Sep 2026 | Milestone 1: ERM ResNet-50, default hparams, 5001 steps | 0 | 84.9 (A 82.5, C 80.9, P 97.8, S 78.3) | done; reference for the 1–3 point reproduction check |
 | E1 | Sep 2026 | First linear-probe notebook: DINOv2 (5×768 features), default LR, 2000 steps | 0 | 95.1 | done; E10 repeats it in the final pipeline (same settings) |
-| E2 | Sep 2026 | First linear-probe notebook: CLIP ViT-B/16, default LR, 2000 steps | 0 | 96.5 | done; superseded by E11 |
+| E2 | Sep 2026 | First linear-probe notebook: CLIP ViT-B/16, default LR, 2000 steps | 0 | 96.5 | done; E11 repeats it in the final pipeline (same settings) |
 | E3 | | First LoRA/full-FT notebook: LoRA DINOv2, LR 1e-4, 3000 steps | 0 | not recorded (fill in if available) | discarded: in that version LoRA was on attention for DINOv2 but on the MLP for CLIP (not comparable), and the run directories were not persistent |
 | E4 | | Same notebook: LoRA CLIP, full FT DINOv2/CLIP | – | – | replaced by the current grid |
-| E10 | | `M2_run_lp_dinov2` | 0 | | to run |
-| E11 | | `M2_run_lp_clip` | 0 | | to run |
+| E10 | 14 Oct 2026 | `M2_run_lp_dinov2` | 0 | 94.5 (A 97.8, C 92.4, P 99.9, S 87.7) | done; ECE 2.0%; ~5.5 min/run, 1.4 GB; matches `collect_results`; −0.6 vs E1 (run-to-run variation) |
+| E11 | 14 Oct 2026 | `M2_run_lp_clip` | 0 | 96.7 (A 96.8, C 98.5, P 99.4, S 92.1) | done; ECE 21.0% (under-confident); ~5 min/run, 1.3 GB; matches `collect_results`; +0.2 vs E2 |
 | E12 | | `M2_run_lora_dinov2` | 0 | | to run |
 | E13 | | `M2_run_lora_clip` | 0 | | to run |
 | E14 | | `M2_run_fullft_dinov2` | 0 | | to run |
