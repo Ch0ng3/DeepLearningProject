@@ -1,12 +1,17 @@
 % Final report -- IEEE 2-column conference format, max 6 pages (course requirement).
-% Compile on Overleaf (IEEEtran is included there) or with any TeX distribution that has IEEEtran.
+% Draft: Milestone 1 and the linear-probe part of Milestone 2 are written with real results;
+% red [TODO] markers show what is still missing. Compile: pdflatex, bibtex, pdflatex x2.
 \documentclass[conference]{IEEEtran}
 \usepackage{cite}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{multirow}
 \usepackage{xcolor}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\pend}{\textcolor{red}{--}}
 
 \begin{document}
 
@@ -14,73 +19,127 @@
 
 \author{
 \IEEEauthorblockN{M\'arton Tam\'as Magyar (TG2UTM), Daniel Brody (IASULA), Marco Buonfantino (FMDKOH)}
-\IEEEauthorblockA{Budapest University of Technology and Economics -- Deep Learning, Project 5}
+\IEEEauthorblockA{Budapest University of Technology and Economics -- Deep Learning, Project~5}
 }
 
 \maketitle
 
 \begin{abstract}
-\todo{4--6 sentences: problem (classifiers trained on photos fail on paintings, cartoons, sketches), what we did (reproduce ERM on PACS with DomainBed; compare ResNet-50, DINOv2 and CLIP backbones adapted by linear probing, LoRA and full fine-tuning; research question of Milestone 3), main numbers, main conclusion.}
+Image classifiers trained on photographs often fail on paintings, cartoons and sketches of the same objects. We study this domain generalization problem on PACS with the DomainBed benchmark. We first reproduce the ERM baseline with a supervised ResNet-50 (84.9\% average accuracy on unseen domains, versus 85.5\% reported in the paper). We then replace the backbone with a self-supervised DINOv2 ViT-B/14 and a language-supervised CLIP ViT-B/16 and compare three adaptation methods: a linear classifier on frozen features, LoRA and full fine-tuning. A linear probe alone already raises the average accuracy to 94.5\% (DINOv2) and 96.7\% (CLIP); CLIP's advantage comes from the most abstract domains, cartoon and sketch, but its confidence scores are poorly calibrated. \todo{LoRA and full fine-tuning results; Milestone~3 research question and answer.}
 \end{abstract}
 
 \section{Introduction}
-\todo{Domain generalization, PACS (7 classes, 4 domains), leave-one-domain-out protocol, why the pretraining of the backbone matters, contributions as a bullet list (one per milestone).}
+A classifier is usually trained and tested on images from the same distribution. Domain generalization asks for more: a model trained on some visual domains must work on a domain it has never seen. PACS~\cite{li2017pacs} is a standard benchmark for this problem: 9{,}991 images of 7 classes (dog, elephant, giraffe, guitar, horse, house, person) in 4 very different styles (photo, art painting, cartoon, sketch). The usual protocol is leave-one-domain-out: train on three domains, test on the fourth.
+
+DomainBed~\cite{gulrajani2021domainbed} showed that, under a fair model-selection protocol, plain Empirical Risk Minimization (ERM) is hard to beat. Its backbone, however, is an ImageNet-supervised ResNet-50. Recent foundation models are pretrained differently: DINOv2~\cite{oquab2023dinov2} with self-supervision on curated images, CLIP~\cite{radford2021clip} with natural-language supervision on web-scale image--text pairs. How these pretraining strategies, and the way the backbone is adapted, affect generalization to unseen styles is the subject of this project.
+
+Our contributions follow the three milestones of the project:
+\begin{itemize}
+  \item \textbf{Reproduction.} We reproduce DomainBed's ERM result on PACS within 0.6 points on average (Section~\ref{sec:m1}).
+  \item \textbf{Improvement.} We replace the backbone with DINOv2 and CLIP and compare linear probing, LoRA~\cite{hu2022lora} and full fine-tuning under the same protocol and data split, changing one factor at a time and reporting accuracy, cost and calibration (Section~\ref{sec:m2}).
+  \item \textbf{Research contribution.} \todo{Milestone 3 question (e.g.\ does fine-tuning hurt the unseen domain and can WiSE-FT~\cite{wortsman2022wiseft} fix it?), 3 seeds, mean $\pm$ std.}
+\end{itemize}
 
 \section{Related Work}
-\todo{DomainBed and fair model selection~\cite{gulrajani2021domainbed}; PACS~\cite{li2017pacs}; DINOv2~\cite{oquab2023dinov2}; CLIP~\cite{radford2021clip}; LoRA~\cite{hu2022lora}; WiSE-FT~\cite{wortsman2022wiseft}.}
+\textbf{Domain generalization.} DomainBed~\cite{gulrajani2021domainbed} re-implemented many algorithms under one protocol and found that, with model selection restricted to training-domain data, ERM matches most specialized methods. We adopt its protocol and its code.
 
-\section{Method}
-\subsection{Protocol}
-All experiments use DomainBed with ERM on PACS, leave-one-domain-out (4 test domains), a 20\% hold-out of every domain, and model selection on the training-domain validation set; the test domain is never used for selection or tuning. Results are the test-domain accuracy of the selected checkpoint. Milestone 2 uses one seed (trial seed 0, the same split as Milestone 1) for every method. \todo{Milestone 3: main experiment with 3 seeds, mean $\pm$ std.}
-\subsection{Backbones and adaptation}
-\todo{ResNet-50 (ImageNet, supervised), DINOv2 ViT-B/14 (self-supervised; features = 4 CLS tokens + mean patch token), CLIP ViT-B/16 (language-supervised, LAION-2B, input renormalization). Linear probe; LoRA rank 8 on the attention projections (identical 442k parameters on both ViTs; parametrization for CLIP's MultiheadAttention); full fine-tuning with 10$\times$ head learning rate. Table of hyperparameters and steps.}
+\textbf{Pretrained backbones.} DINOv2~\cite{oquab2023dinov2} learns general-purpose features by self-distillation without labels; its frozen features give strong linear-probe results. CLIP~\cite{radford2021clip} aligns images and captions with a contrastive loss and enables zero-shot classification; it is known to be robust to natural distribution shifts.
 
-\section{Milestone 1: Reproduction}
+\textbf{Adaptation.} A linear probe trains only a classifier on frozen features. LoRA~\cite{hu2022lora} adds trainable low-rank updates to frozen weight matrices. Full fine-tuning updates every weight but can distort pretrained features and reduce robustness out of distribution, which WiSE-FT~\cite{wortsman2022wiseft} counters by interpolating zero-shot and fine-tuned weights.
+
+\section{Experimental Protocol}\label{sec:protocol}
+All experiments use the official DomainBed code with ERM on PACS. Each domain is split into an \emph{in} part (80\%) and an \emph{out} part (20\%). The model is trained on the \emph{in} parts of three domains, a checkpoint is evaluated every 300 steps, and the checkpoint with the highest mean accuracy on the \emph{out} parts of the training domains is selected (\emph{training-domain validation}). We report the accuracy of the selected checkpoint on the held-out domain. The held-out domain is never used for selection or tuning; DomainBed's oracle selection is reported only for reference. Every run uses data split and seed~0, identical to Milestone~1, so all methods are compared on the same data. Training uses 32 images per training domain per step, DomainBed's data augmentation, $224\times224$ inputs and Adam. Besides accuracy, we log for the held-out domain the confusion matrix and the expected calibration error (ECE, 15 bins) of the selected checkpoint. Experiments run on a single NVIDIA A100 in Google Colab.
+
+\section{Milestone 1: Reproduction}\label{sec:m1}
+We run DomainBed's ERM with the torchvision ImageNet ResNet-50 (the default \texttt{resnet50\_augmix} backbone is switched off to match the paper), default hyperparameters (learning rate $5\times10^{-5}$, no weight decay) and 5000 steps, once per held-out domain. PACS was taken from the Hugging Face copy because DomainBed's download failed.
+
 \begin{table}[t]
 \centering
-\caption{ERM with ResNet-50 on PACS, training-domain validation (accuracy \%).}
+\caption{Milestone 1: ERM with ResNet-50 on PACS, training-domain validation (accuracy on the held-out domain, \%).}
 \label{tab:m1}
 \begin{tabular}{lccccc}
 \toprule
  & A & C & P & S & Avg\\
 \midrule
-DomainBed paper~\cite{gulrajani2021domainbed} & 84.7 & 80.8 & 97.2 & 79.3 & 85.5\\
+DomainBed~\cite{gulrajani2021domainbed} & 84.7 & 80.8 & 97.2 & 79.3 & 85.5\\
 Ours (seed 0) & 82.5 & 80.9 & 97.8 & 78.3 & 84.9\\
 \bottomrule
 \end{tabular}
 \end{table}
-Our single run is within 0.6 points of the paper on average and within 2.2 points on every domain (Table~\ref{tab:m1}), inside the 1--3 point range expected from random initialization, library versions and the absence of the paper's hyperparameter search (we use the default hyperparameters). \todo{Discuss the per-domain differences (Art, Sketch).}
 
-\section{Milestone 2: Improving the Backbone}
+Table~\ref{tab:m1} shows that our average is 0.6 points below the paper and every domain is within 2.2 points, inside the expected 1--3 point range. The paper reports, for each held-out domain, the best of 20 random hyperparameter configurations averaged over 3 data splits, while we use a single run with default hyperparameters; the largest gaps are on art (\textminus2.2) and sketch (\textminus1.0). The oracle selection gives 85.3, confirming that training-domain validation costs little here.
+
+\section{Milestone 2: Improving the Backbone}\label{sec:m2}
+\subsection{Backbones and adaptation methods}
+We change one factor at a time: the backbone (ResNet-50 $\to$ DINOv2 ViT-B/14 $\to$ CLIP ViT-B/16) or the adaptation method (linear probe $\to$ LoRA $\to$ full fine-tuning), keeping data, split, protocol and training code fixed.
+
+\textbf{DINOv2 ViT-B/14} (LVD-142M) is loaded from the official repository; following DomainBed and the DINOv2 linear-evaluation recipe, the feature is the concatenation of the class tokens of the last four blocks and the mean patch token ($5\times768=3840$ dimensions). \textbf{CLIP ViT-B/16} (OpenCLIP, LAION-2B) uses only the image tower; its 512-dimensional embedding is the feature, and inputs are re-normalized from ImageNet to CLIP statistics.
+
+The \textbf{linear probe} freezes the backbone and trains a linear classifier (learning rate $5\times10^{-5}$, 2000 steps). \textbf{LoRA} freezes the backbone and adds rank-8 adapters ($\alpha=16$) to the fused query--key--value and output projections of every attention block, 442{,}368 parameters on both backbones (on CLIP through a parametrization of its attention weights), trained with the classifier (learning rate $5\times10^{-4}$, 1500 steps). \textbf{Full fine-tuning} trains all weights (learning rate $10^{-5}$ for the backbone and $10^{-4}$ for the new classifier, 1500 steps). Learning rates differ because the methods train very different numbers of parameters; the cost of each method is measured and reported in Table~\ref{tab:m2}.
+
 \begin{table*}[t]
 \centering
-\caption{Test-domain accuracy (\%, seed 0) and cost. \todo{fill from M2\_results.ipynb}}
+\caption{Milestone 2: accuracy on the held-out domain (\%, seed 0, training-domain validation), calibration and cost. \textcolor{red}{Red dashes: runs not finished yet.}}
 \label{tab:m2}
-\begin{tabular}{llccccccccc}
+\begin{tabular}{llcccccccc}
 \toprule
-Backbone & Adaptation & A & C & P & S & Avg & ECE & Trainable params & VRAM (GB) & s/step\\
+Backbone & Adaptation & A & C & P & S & \textbf{Avg} & ECE (\%) & Trainable params & s/step (A100)\\
 \midrule
-ResNet-50 (M1) & full (ERM) & 82.5 & 80.9 & 97.8 & 78.3 & 84.9 & & & & \\
-DINOv2 & linear probe & & & & & & & & & \\
-DINOv2 & LoRA & & & & & & & & & \\
-DINOv2 & full FT & & & & & & & & & \\
-CLIP & zero-shot & & & & & & & 0 & & \\
-CLIP & linear probe & & & & & & & & & \\
-CLIP & LoRA & & & & & & & & & \\
-CLIP & full FT & & & & & & & & & \\
+ResNet-50 (M1) & full (ERM) & 82.5 & 80.9 & 97.8 & 78.3 & \textbf{84.9} & -- & 23.5M & -- \\
+\midrule
+\multirow{3}{*}{DINOv2 ViT-B/14} & linear probe & 97.8 & 92.4 & 99.9 & 87.7 & \textbf{94.5} & 2.0 & 26.9k & 0.108\\
+ & LoRA & \pend & \pend & \pend & \pend & \pend & \pend & 0.44M + head & \pend\\
+ & full fine-tuning & \pend & \pend & \pend & \pend & \pend & \pend & 86.6M & \pend\\
+\midrule
+\multirow{3}{*}{CLIP ViT-B/16} & linear probe & 96.8 & 98.5 & 99.4 & 92.1 & \textbf{96.7} & 21.0 & 3.6k & 0.093\\
+ & LoRA & \pend & \pend & \pend & \pend & \pend & \pend & 0.44M + head & \pend\\
+ & full fine-tuning & \pend & \pend & \pend & \pend & \pend & \pend & 111.8M & \pend\\
 \bottomrule
 \end{tabular}
 \end{table*}
-\todo{Effect of the backbone (one factor at a time), effect of the adaptation method, accuracy vs.\ cost, which differences are large enough to be meaningful with one seed, computational budget of each method (steps, time).}
 
-\section{Milestone 3: Research Question}
-\todo{State the research question(s); WiSE-FT curve with $\alpha$ selected on training-domain validation; few-shot results; calibration (ECE, reliability). Main experiment with 3 seeds, mean $\pm$ std.}
+\subsection{Results}
+\textbf{Backbone.} Replacing the ResNet-50 by a frozen foundation model with only a linear classifier on top already gives the largest improvement of the project: +9.6 points with DINOv2 and +11.8 with CLIP (Table~\ref{tab:m2}, Fig.~\ref{fig:domains}). The gains concentrate on the domains furthest from photographs: on sketch, accuracy rises from 78.3 to 87.7 (DINOv2) and 92.1 (CLIP); on photo, where ResNet-50 is already at 97.8, all models are close to the ceiling.
 
-\section{Error Analysis and Limitations}
-\todo{Per-class accuracy and most frequent confusions per held-out domain (from the confusion matrices), example failures (e.g.\ sketches), over-confidence on the unseen domain; limitations: single dataset, no hyperparameter search, fewer steps for the ViTs, compute constraints.}
+\textbf{DINOv2 vs.\ CLIP.} CLIP beats DINOv2 by 2.2 points on average even though its feature has 7.5$\times$ fewer dimensions. The difference comes entirely from cartoon (+6.1) and sketch (+4.4), whereas DINOv2 is slightly better on art (+1.0) and photo (+0.5). A plausible explanation is the supervision signal: language descriptions group objects by semantic category regardless of rendering style, while self-supervised features also encode appearance statistics of natural images. With a single seed, differences below 1--2 points (art, photo) are not conclusive.
+
+\textbf{Cost.} Both linear probes train only a few thousand parameters, take about 5 minutes per run and need about 1.3\,GB of GPU memory. \todo{Compare with LoRA and full fine-tuning when available.}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=5pt, width=\columnwidth, height=4.6cm,
+  ymin=70, ymax=101, ylabel={Accuracy (\%)},
+  symbolic x coords={Art,Cartoon,Photo,Sketch,Avg}, xtick=data,
+  legend style={at={(0.5,1.02)},anchor=south,legend columns=3,font=\footnotesize},
+  tick label style={font=\footnotesize}, label style={font=\footnotesize},
+  enlarge x limits=0.15]
+\addplot coordinates {(Art,82.5) (Cartoon,80.9) (Photo,97.8) (Sketch,78.3) (Avg,84.9)};
+\addplot coordinates {(Art,97.8) (Cartoon,92.4) (Photo,99.9) (Sketch,87.7) (Avg,94.5)};
+\addplot coordinates {(Art,96.8) (Cartoon,98.5) (Photo,99.4) (Sketch,92.1) (Avg,96.7)};
+\legend{ResNet-50 ERM, DINOv2 LP, CLIP LP}
+\end{axis}
+\end{tikzpicture}
+\caption{Accuracy on each held-out domain: ResNet-50 (Milestone 1) and linear probes (LP) on DINOv2 and CLIP. \todo{add LoRA / full fine-tuning}}
+\label{fig:domains}
+\end{figure}
+
+\textbf{Adaptation method.} \todo{LoRA and full fine-tuning vs.\ linear probe for each backbone; does training the backbone help or hurt the unseen domain?}
+
+\subsection{Error analysis and calibration}
+The confusion matrices of the held-out domains show that most remaining errors are between four-legged animals in the abstract domains. On sketch, DINOv2 labels 143 giraffes and 60 dogs as horses and 69 guitars as persons; CLIP makes the same giraffe$\to$horse (82) and dog$\to$horse (53) errors, but fewer. On cartoon, DINOv2 recognizes only 74\% of the horses (41 predicted as dog, 24 as giraffe), which explains most of its 6-point gap to CLIP on that domain. On art, CLIP's main error is the class person, spread over dog, guitar, horse and house.
+
+The two backbones differ sharply in calibration. DINOv2's linear probe is well calibrated (ECE 2.0\%), whereas CLIP's is strongly \emph{under}-confident: its mean confidence is 68--82\% while its accuracy is 92--99\%, giving an ECE of 21\%. The most likely cause is that, with the same classifier learning rate, the small-norm CLIP embedding produces small logits, so the softmax stays flat even when the prediction is correct. Accuracy alone therefore hides that CLIP's confidence scores are not reliable on the unseen domains, a point that Milestone~3 investigates further. \todo{Repeat the analysis for LoRA and full fine-tuning.}
+
+\section{Milestone 3: Research Question}\label{sec:m3}
+\todo{Question, method, main experiment with at least 3 random seeds (mean $\pm$ std), model selection and every hyperparameter (e.g.\ WiSE-FT mixing coefficient, temperature) chosen on training-domain validation only, test domain used only for the final evaluation; answer to the question.}
+
+\section{Limitations}
+All Milestone~2 results come from a single seed and a single data split, so small differences are not significant; Milestone~3 uses three seeds. We did not search hyperparameters: the learning rates are standard values for each adaptation method, and the vision transformers are trained for fewer steps than the ResNet-50 (1500--2000 vs.\ 5000), which favors the cheaper methods. Finally, PACS is small and has only seven classes; conclusions may not transfer to larger benchmarks such as DomainNet.
 
 \section{Conclusion}
-\todo{3--4 sentences.}
+\todo{3--4 sentences once all results are in: effect of the pretraining type, effect of the adaptation method, cost, calibration, Milestone 3 answer.}
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
