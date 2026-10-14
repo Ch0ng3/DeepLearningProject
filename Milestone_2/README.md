@@ -39,7 +39,7 @@ The computational budget is reported per method from the measurements (trainable
 
 ## How to run
 
-One notebook per method × backbone (4 runs each: one per held-out domain, seed 0), plus one notebook for the final table. The baseline is the Milestone 1 run. The run notebooks are independent, so different team members can run them in parallel. They run on **Colab** or **Kaggle** (detected automatically; on Kaggle *Save & Run All* runs in the background for up to ~12 h).
+One notebook per method × backbone (4 runs each: one per held-out domain, seed 0), plus one notebook for the final table. The baseline is the Milestone 1 run. The run notebooks are independent, so different team members can run them in parallel. They run on **Google Colab**.
 
 | Notebook | Runs | Est. time (A100) | Who |
 |---|---|---|---|
@@ -51,7 +51,7 @@ One notebook per method × backbone (4 runs each: one per held-out domain, seed 
 | `M2_run_fullft_clip.ipynb` | 4 | ~55 min | |
 | `M2_results.ipynb` | final table, error analysis, CLIP zero-shot | ~10 min | |
 
-Times are estimates (+ ~10 min setup per session; roughly double on Kaggle's P100/T4). In total about 5 hours of GPU time.
+Times are estimates (+ ~10 min setup per session). In total about 5 hours of GPU time.
 
 1. Open a run notebook, set `SESSION_BUDGET_MIN` (section 4) to how long you can stay, then *Run all* (section 1 asks for Google Drive access). No run is started that cannot finish within the budget.
 2. Next session: *Run all* again: the runs already saved on Drive are skipped.
@@ -59,10 +59,10 @@ Times are estimates (+ ~10 min setup per session; roughly double on Kaggle's P10
 
 ### Saving results and logs
 
-Every finished run is saved immediately to **Google Drive** (`MyDrive/DeepLearningProject/M2_backup/<run>/`; on Kaggle to `/kaggle/working/M2_backup/`): `result.json` (the numbers of the run) and the DomainBed logs (`results.jsonl`, `out.txt`, `err.txt`). Section 1 asks once for Drive access.
+Every finished run is saved immediately to **Google Drive** (`MyDrive/DeepLearningProject/M2_backup/<run>/`): `result.json` (the numbers of the run) and the DomainBed logs (`results.jsonl`, `out.txt`, `err.txt`). Section 1 asks once for Drive access.
 
 - In a later session the runs already on Drive are skipped automatically: just *Run all* again.
-- `M2_results.ipynb` reads all runs from Drive (runs made on Kaggle can be pasted as `RESULT` lines).
+- `M2_results.ipynb` reads all runs from Drive (runs saved on the Drive of another team member can be pasted as `RESULT` lines).
 - Model weights are not saved (not needed for Milestone 2); set `SAVE_CHECKPOINTS = True` in section 4 to save them (fp16, ~200 MB per run).
 
 ## Experiment log
