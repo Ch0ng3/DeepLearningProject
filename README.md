@@ -47,3 +47,96 @@ Related materials:
     Paper – CLIP: https://arxiv.org/abs/2103.00020
     Paper – WiSE-FT: https://arxiv.org/abs/2109.01903
 
+# General Project Guidelines
+
+## Computing Resources
+
+All projects are designed to run using free computing resources, mainly Google Colab and Kaggle.
+
+Google Colab provides free GPU access, although GPU availability and GPU type may vary. If a GPU is not available in Colab, you can use Kaggle Notebooks as an alternative.
+
+Kaggle normally provides a weekly GPU quota, with individual GPU sessions of up to approximately 12 hours.
+
+**Important:** Cloud sessions can disconnect or reset. Therefore, always save your model checkpoints, results, logs, and important files regularly. If you use Google Colab, saving them to Google Drive is strongly recommended.
+
+## Environment and Compatibility
+
+Research repositories are sometimes several years old and may depend on older versions of Python, PyTorch, CUDA, or other libraries.
+
+Colab updates its Python and pre-installed libraries regularly. Therefore, an older repository may not run immediately with its original `requirements.txt`.
+
+If this happens:
+
+- First try using Colab's pre-installed PyTorch.
+- Install only the additional packages required by the repository.
+- Avoid replacing the entire Colab environment unless necessary.
+- Check the instructions provided for your selected project, as known compatibility issues will be mentioned there.
+
+Troubleshooting and adapting an existing research repository is also part of the learning process.
+
+## Milestone 1 – Reproduce
+
+Run the published implementation and try to reproduce the main results reported in the paper or project description.
+
+A small difference due to random initialization, hardware, library versions, or training conditions is normal. A difference of approximately 1–3 percentage points may be considered normal for many experiments.
+
+If your result is significantly different, investigate the reason and explain it clearly in your report.
+
+The objective is not only to run the code, but also to understand how the system works and how the reported results were obtained.
+
+## Milestone 2 – Improve
+
+After reproducing the baseline, make controlled improvements to the system.
+
+Examples may include:
+
+- modifying the model architecture,
+- changing features or preprocessing,
+- improving training strategies,
+- testing different loss functions,
+- adding augmentation,
+- or investigating another clearly motivated improvement.
+
+Make one major change at a time whenever possible so that you can understand its effect.
+
+Keep the same dataset split and use a comparable computational budget.
+
+Record every experiment and its results.
+
+## Milestone 3 – Research Contribution
+
+For the advanced version of the project, you should go beyond reproducing and improving the baseline and investigate a small research question.
+
+You should:
+
+- Avoid using the test set for model selection or hyperparameter tuning.
+- Use the test set only for the final evaluation.
+- Run the main experiment with at least 3 random seeds.
+- Report the main results as mean ± standard deviation.
+- Analyse the model's errors and limitations.
+- Investigate and answer at least one clear research question.
+
+## Project Levels
+
+**Option A – Basic Project**
+
+Teams completing Option A are expected to:
+
+- successfully complete Milestone 1 – Reproduce,
+- complete a meaningful Milestone 2 – Improve,
+- analyse and discuss their results,
+- and submit the final project report.
+
+**Option B – Advanced Project**
+
+Teams completing Option B are expected to complete:
+
+- Milestone 1,
+- Milestone 2,
+- and Milestone 3 – Research Contribution.
+
+## Final Report
+
+- It must be written using the IEEE 2-column format and not exceed 6 pages.
+- Outstanding projects with strong and well-supported results may be further developed into a workshop or conference submission.
+
