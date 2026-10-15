@@ -82,9 +82,31 @@ Every experiment of Milestone 2, including the early ones that are no longer par
 | E13 | 14 Oct 2026 | `M2_run_lora_clip` | 0 | 97.1 (A 98.5, C 97.9, P 99.7, S 92.4) | done; best of Milestone 2, +0.4 vs the linear probe (A +1.7, C −0.6); fixes the linear probe's under-confidence (ECE 21.0% → 1.8%), sketch ECE 5.0%; ~6.2 min/run, 8.9 GB; best step 300–1499 (median 600); matches `collect_results` |
 | E14 | 15 Oct 2026 | `M2_run_fullft_dinov2` | 0 | 93.5 (A 96.6, C 93.0, P 99.9, S 84.8) | done; −1.0 vs the linear probe, mostly sketch (−2.9); on sketch the test accuracy swings between 74.4 and 84.8 across checkpoints while the validation accuracy stays at 98.5–99.6 (best step 300); over-confident on sketch (ECE 8.4%); ~8.0 min/run, 17.1 GB; matches `collect_results` (oracle 91.9) |
 | E15 | 15 Oct 2026 | `M2_run_fullft_clip` | 0 | 95.4 (A 96.6, C 96.3, P 99.0, S 89.6) | done; −1.3 vs the linear probe, −1.7 vs LoRA, mostly sketch (−2.5 vs LP); sketch test accuracy 79.0–91.0 across checkpoints, art drops to 90.1 at the last step; ECE 2.5% (sketch 6.2%); ~6.9 min/run, 12.8 GB; matches `collect_results` (oracle 94.2) |
-| E16 | | CLIP zero-shot (`M2_results`, no training) | – | | to run |
-| E17 | | optional: `dinov2_cls` ablation (in `M2_run_lp_dinov2`) | 0 | | optional |
+| E16 | 15 Oct 2026 | CLIP zero-shot (`M2_results`, no training) | – | 97.2 (A 98.8, C 99.1, P 99.8, S 91.0); prompt ensemble 97.6 | done; on par with the best trained model (LoRA 97.1); full FT is below zero-shot on every domain; the ensemble uses style words (painting/cartoon/sketch), so it is only a reference; evaluated on the whole held-out domain |
+| E17 | | optional: `dinov2_cls` ablation (in `M2_run_lp_dinov2`) | 0 | | not run (optional) |
 
 ## Results
 
-To be filled from `M2_results.ipynb` (final table, error analysis and calibration, CLIP zero-shot).
+From `M2_results.ipynb` (seed 0, training-domain validation, accuracy on the held-out domain in %). The per-domain values are rounded from the exact accuracies; `collect_results` gives the same numbers.
+
+| Backbone | Method | A | C | P | S | Avg | ECE (%) | Trainable params | Peak VRAM (GB) | s/step (A100) | Best step (median / last) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| ResNet-50 (M1) | ERM, full | 82.5 | 80.9 | 97.8 | 78.3 | **84.9** | – | 23.5M | 8.1* | 0.50* | – |
+| DINOv2 ViT-B/14 | linear probe | 97.8 | 92.4 | 99.9 | 87.7 | **94.5** | 2.0 | 26,887 | 1.4 | 0.108 | 1800 / 1999 |
+| DINOv2 ViT-B/14 | LoRA | 96.2 | 95.6 | 100.0 | 86.4 | **94.5** | 3.4 | 469,255 | 10.6 | 0.240 | 750 / 1499 |
+| DINOv2 ViT-B/14 | full FT | 96.6 | 93.0 | 99.9 | 84.8 | **93.5** | 3.4 | 86,607,367 | 17.1 | 0.256 | 1349 / 1499 |
+| CLIP ViT-B/16 | zero-shot | 98.8 | 99.1 | 99.8 | 91.0 | **97.2** | – | 0 | – | – | – |
+| CLIP ViT-B/16 | linear probe | 96.8 | 98.5 | 99.4 | 92.1 | **96.7** | 21.0 | 3,591 | 1.2 | 0.093 | 1749 / 1999 |
+| CLIP ViT-B/16 | LoRA | 98.5 | 97.9 | 99.7 | 92.4 | **97.1** | 1.8 | 445,959 | 8.9 | 0.190 | 600 / 1499 |
+| CLIP ViT-B/16 | full FT | 96.6 | 96.3 | 99.0 | 89.6 | **95.4** | 2.5 | 111,795,720 | 12.8 | 0.220 | 750 / 1499 |
+
+\* From the Milestone 1 log; the GPU of that run was not recorded, so it is not directly comparable with the A100 numbers.
+
+Main findings (one seed: differences below ~1–2 points are not conclusive):
+
+- **Backbone.** Every DINOv2/CLIP configuration beats the ResNet-50 baseline by 8.6–12.3 points; the gain is largest on art and cartoon (up to +15 and +18) and smallest on photo, which is already near the ceiling. CLIP beats DINOv2 with every adaptation method, mostly on cartoon and sketch.
+- **Adaptation.** LoRA ≈ linear probe (DINOv2 94.5 = 94.5, CLIP 97.1 vs 96.7); full fine-tuning is the worst on both backbones (−1.0 and −1.3 vs the linear probe), mostly on sketch. On the sketch runs the training-domain validation stays at 97.5–99.6% while the sketch accuracy swings by 10–12 points across checkpoints, so model selection cannot see the damage.
+- **Zero-shot.** CLIP without any training (97.2) is on par with the best trained model; full fine-tuning is below zero-shot on every domain. This motivates WiSE-FT in Milestone 3.
+- **Calibration.** CLIP's linear probe is strongly under-confident (ECE 21%); LoRA and full FT fix this. Every method that trains the backbone is over-confident on sketch (ECE 5–9%); only DINOv2's linear probe stays calibrated there (2.5%).
+- **Cost.** LoRA saves 30–38% of the GPU memory of full fine-tuning but only 6–14% of the time per step.
+
