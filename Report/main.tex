@@ -1,5 +1,5 @@
 % Final report -- IEEE 2-column conference format, max 6 pages (course requirement).
-% Draft: Milestone 1 and the linear-probe part of Milestone 2 are written with real results;
+% Draft: Milestone 1 and Milestone 2 are written with real results;
 % red [TODO] markers show what is still missing. Compile: pdflatex, bibtex, pdflatex x2.
 \documentclass[conference]{IEEEtran}
 \usepackage{cite}
@@ -25,7 +25,7 @@
 \maketitle
 
 \begin{abstract}
-Image classifiers trained on photographs often fail on paintings, cartoons and sketches of the same objects. We study this domain generalization problem on PACS with the DomainBed benchmark. We first reproduce the ERM baseline with a supervised ResNet-50 (84.9\% average accuracy on unseen domains, versus 85.5\% reported in the paper). We then replace the backbone with a self-supervised DINOv2 ViT-B/14 and a language-supervised CLIP ViT-B/16 and compare three adaptation methods: a linear classifier on frozen features, LoRA and full fine-tuning. A linear probe alone already raises the average accuracy to 94.5\% (DINOv2) and 96.7\% (CLIP); CLIP's advantage comes from the most abstract domains, cartoon and sketch, but its confidence scores are poorly calibrated. \todo{LoRA and full fine-tuning results; Milestone~3 research question and answer.}
+Image classifiers trained on photographs often fail on paintings, cartoons and sketches of the same objects. We study this domain generalization problem on PACS with the DomainBed benchmark. We first reproduce the ERM baseline with a supervised ResNet-50 (84.9\% average accuracy on unseen domains, versus 85.5\% reported in the paper). We then replace the backbone with a self-supervised DINOv2 ViT-B/14 and a language-supervised CLIP ViT-B/16 and compare three adaptation methods: a linear classifier on frozen features, LoRA and full fine-tuning. A linear probe alone already raises the average accuracy to 94.5\% (DINOv2) and 96.7\% (CLIP); CLIP's advantage comes from the most abstract domains, cartoon and sketch, but its linear probe is strongly under-confident. Training the backbone helps only when it is done conservatively: LoRA on CLIP gives the best result (97.1\%) and fixes its calibration, whereas full fine-tuning lowers the accuracy of both backbones (93.5\% and 95.4\%), mostly on sketch, where the selected checkpoint becomes unstable and over-confident. \todo{Milestone~3 research question and answer.}
 \end{abstract}
 
 \section{Introduction}
@@ -79,21 +79,21 @@ The \textbf{linear probe} freezes the backbone and trains a linear classifier (l
 
 \begin{table*}[t]
 \centering
-\caption{Milestone 2: accuracy on the held-out domain (\%, seed 0, training-domain validation), calibration and cost. \textcolor{red}{Red dashes: runs not finished yet.}}
+\caption{Milestone 2: accuracy on the held-out domain (\%, seed 0, training-domain validation), calibration (mean ECE over the four held-out domains) and cost (peak GPU memory and time per step on an A100).}
 \label{tab:m2}
-\begin{tabular}{llcccccccc}
+\begin{tabular}{llccccccccc}
 \toprule
-Backbone & Adaptation & A & C & P & S & \textbf{Avg} & ECE (\%) & Trainable params & s/step (A100)\\
+Backbone & Adaptation & A & C & P & S & \textbf{Avg} & ECE (\%) & Trainable params & VRAM (GB) & s/step\\
 \midrule
-ResNet-50 (M1) & full (ERM) & 82.5 & 80.9 & 97.8 & 78.3 & \textbf{84.9} & -- & 23.5M & -- \\
+ResNet-50 (M1) & full (ERM) & 82.5 & 80.9 & 97.8 & 78.3 & \textbf{84.9} & -- & 23.5M & -- & -- \\
 \midrule
-\multirow{3}{*}{DINOv2 ViT-B/14} & linear probe & 97.8 & 92.4 & 99.9 & 87.7 & \textbf{94.5} & 2.0 & 26.9k & 0.108\\
- & LoRA & 96.2 & 95.6 & 100.0 & 86.4 & \textbf{94.5} & 3.4 & 469k & 0.240\\
- & full fine-tuning & \pend & \pend & \pend & \pend & \pend & \pend & 86.6M & \pend\\
+\multirow{3}{*}{DINOv2 ViT-B/14} & linear probe & 97.8 & 92.4 & 99.9 & 87.7 & \textbf{94.5} & 2.0 & 26.9k & 1.4 & 0.108\\
+ & LoRA & 96.2 & 95.6 & 100.0 & 86.4 & \textbf{94.5} & 3.4 & 469k & 10.6 & 0.240\\
+ & full fine-tuning & 96.6 & 93.0 & 99.9 & 84.8 & \textbf{93.5} & 3.4 & 86.6M & 17.1 & 0.256\\
 \midrule
-\multirow{3}{*}{CLIP ViT-B/16} & linear probe & 96.8 & 98.5 & 99.4 & 92.1 & \textbf{96.7} & 21.0 & 3.6k & 0.093\\
- & LoRA & \pend & \pend & \pend & \pend & \pend & \pend & 0.44M + head & \pend\\
- & full fine-tuning & \pend & \pend & \pend & \pend & \pend & \pend & 111.8M & \pend\\
+\multirow{3}{*}{CLIP ViT-B/16} & linear probe & 96.8 & 98.5 & 99.4 & 92.1 & \textbf{96.7} & 21.0 & 3.6k & 1.3 & 0.093\\
+ & LoRA & 98.5 & 97.9 & 99.7 & 92.4 & \textbf{97.1} & 1.8 & 446k & 8.9 & 0.190\\
+ & full fine-tuning & 96.6 & 96.3 & 99.0 & 89.6 & \textbf{95.4} & 2.5 & 111.8M & 12.8 & 0.220\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -103,35 +103,40 @@ ResNet-50 (M1) & full (ERM) & 82.5 & 80.9 & 97.8 & 78.3 & \textbf{84.9} & -- & 2
 
 \textbf{DINOv2 vs.\ CLIP.} CLIP beats DINOv2 by 2.2 points on average even though its feature has 7.5$\times$ fewer dimensions. The difference comes entirely from cartoon (+6.1) and sketch (+4.4), whereas DINOv2 is slightly better on art (+1.0) and photo (+0.5). A plausible explanation is the supervision signal: language descriptions group objects by semantic category regardless of rendering style, while self-supervised features also encode appearance statistics of natural images. With a single seed, differences below 1--2 points (art, photo) are not conclusive.
 
-\textbf{Cost.} Both linear probes train only a few thousand parameters, take about 5 minutes per run and need about 1.3\,GB of GPU memory. LoRA on DINOv2 trains 469k parameters but must back-propagate through the whole backbone: it is 2.2$\times$ slower per step (0.240\,s), takes 7.8 minutes per run and needs 10.6\,GB. \todo{full fine-tuning when available.}
+\textbf{Cost.} Both linear probes train only a few thousand parameters, take about 5 minutes per run and need about 1.3\,GB of GPU memory. LoRA on DINOv2 trains 469k parameters but must back-propagate through the whole backbone: it is 2.2$\times$ slower per step (0.240\,s), takes 7.8 minutes per run and needs 10.6\,GB; LoRA on CLIP (446k parameters) needs 8.9\,GB and 6.2 minutes. Full fine-tuning trains 86.6M (DINOv2) and 111.8M (CLIP) parameters and needs 17.1\,GB and 12.8\,GB, at 0.256 and 0.220\,s per step (8.0 and 6.9 minutes per run). DINOv2 is the more expensive backbone to train despite having fewer parameters, because its $14\times14$ patches give 256 tokens per image instead of 196. LoRA therefore saves 30--38\% of the memory of full fine-tuning but only 6--14\% of the time, since the backward pass still traverses the whole network.
 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-  ybar, bar width=4pt, width=\columnwidth, height=4.6cm,
+  ybar, bar width=3pt, width=\columnwidth, height=4.6cm,
   ymin=70, ymax=101, ylabel={Accuracy (\%)},
   symbolic x coords={Art,Cartoon,Photo,Sketch,Avg}, xtick=data,
-  legend style={at={(0.5,1.02)},anchor=south,legend columns=2,font=\footnotesize},
+  legend style={at={(0.5,1.02)},anchor=south,legend columns=4,font=\scriptsize},
   tick label style={font=\footnotesize}, label style={font=\footnotesize},
   enlarge x limits=0.15]
-\addplot coordinates {(Art,82.5) (Cartoon,80.9) (Photo,97.8) (Sketch,78.3) (Avg,84.9)};
-\addplot coordinates {(Art,97.8) (Cartoon,92.4) (Photo,99.9) (Sketch,87.7) (Avg,94.5)};
-\addplot coordinates {(Art,96.8) (Cartoon,98.5) (Photo,99.4) (Sketch,92.1) (Avg,96.7)};
-\addplot coordinates {(Art,96.2) (Cartoon,95.6) (Photo,100.0) (Sketch,86.4) (Avg,94.5)};
-\legend{ResNet-50 ERM, DINOv2 LP, CLIP LP, DINOv2 LoRA}
+\addplot[fill=gray!60,draw=none] coordinates {(Art,82.5) (Cartoon,80.9) (Photo,97.8) (Sketch,78.3) (Avg,84.9)};
+\addplot[fill=blue!25,draw=none] coordinates {(Art,97.8) (Cartoon,92.4) (Photo,99.9) (Sketch,87.7) (Avg,94.5)};
+\addplot[fill=blue!55,draw=none] coordinates {(Art,96.2) (Cartoon,95.6) (Photo,100.0) (Sketch,86.4) (Avg,94.5)};
+\addplot[fill=blue!90!black,draw=none] coordinates {(Art,96.6) (Cartoon,93.0) (Photo,99.9) (Sketch,84.8) (Avg,93.5)};
+\addplot[fill=orange!30,draw=none] coordinates {(Art,96.8) (Cartoon,98.5) (Photo,99.4) (Sketch,92.1) (Avg,96.7)};
+\addplot[fill=orange!70,draw=none] coordinates {(Art,98.5) (Cartoon,97.9) (Photo,99.7) (Sketch,92.4) (Avg,97.1)};
+\addplot[fill=orange!80!black,draw=none] coordinates {(Art,96.6) (Cartoon,96.3) (Photo,99.0) (Sketch,89.6) (Avg,95.4)};
+\legend{ResNet-50 ERM, DINOv2 LP, DINOv2 LoRA, DINOv2 FT, CLIP LP, CLIP LoRA, CLIP FT}
 \end{axis}
 \end{tikzpicture}
-\caption{Accuracy on each held-out domain: ResNet-50 (Milestone 1), linear probes (LP) on DINOv2 and CLIP, and LoRA on DINOv2. \todo{add CLIP LoRA and full fine-tuning}}
+\caption{Accuracy on each held-out domain: ResNet-50 (Milestone 1) and DINOv2 (blue) and CLIP (orange) with linear probe (LP), LoRA and full fine-tuning (FT).}
 \label{fig:domains}
 \end{figure}
 
-\textbf{Adaptation method.} On DINOv2, LoRA reaches the same average as the linear probe (94.5) but redistributes the accuracy: it gains on cartoon (+3.2) and loses on art (\textminus1.6) and sketch (\textminus1.3). Adapting the attention layers fits the training domains almost perfectly (99--100\% on their validation splits) and the best checkpoint is reached early (300--1200 of 1500 steps), so the additional capacity mainly specializes the features to the source styles instead of improving the most distant domain. \todo{CLIP LoRA, full fine-tuning on both backbones.}
+\textbf{Adaptation method.} On DINOv2, LoRA reaches the same average as the linear probe (94.5) but redistributes the accuracy: it gains on cartoon (+3.2) and loses on art (\textminus1.6) and sketch (\textminus1.3). Adapting the attention layers fits the training domains almost perfectly (99--100\% on their validation splits) and the best checkpoint is reached early (300--1200 of 1500 steps), so the additional capacity mainly specializes the features to the source styles instead of improving the most distant domain. On CLIP, LoRA gives the best result of the project, 97.1 (+0.4 over the linear probe: art +1.7, cartoon \textminus0.6, photo and sketch +0.3), a difference within single-seed noise.
+
+Full fine-tuning is the worst adaptation on both backbones: 93.5 on DINOv2 (\textminus1.0 vs.\ the linear probe) and 95.4 on CLIP (\textminus1.3 vs.\ the linear probe, \textminus1.7 vs.\ LoRA). The loss is concentrated on sketch, the domain furthest from the training styles: \textminus2.9 on DINOv2 and \textminus2.5 on CLIP. The training curves show why model selection cannot prevent it. On the sketch runs, the validation accuracy of the training domains stays between 97.5\% and 99.6\% at every checkpoint, while the sketch accuracy swings between 74.4\% and 84.8\% (DINOv2) and between 79.0\% and 91.0\% (CLIP); likewise, CLIP's art accuracy drops from 96.9\% to 90.1\% at the last step while validation changes by less than 3 points. Updating all weights thus distorts the pretrained features in a way that is invisible on the source domains, which is the failure mode that WiSE-FT~\cite{wortsman2022wiseft} is designed to fix and that Milestone~3 examines.
 
 \subsection{Error analysis and calibration}
 The confusion matrices of the held-out domains show that most remaining errors are between four-legged animals in the abstract domains. On sketch, DINOv2 labels 143 giraffes and 60 dogs as horses and 69 guitars as persons; CLIP makes the same giraffe$\to$horse (82) and dog$\to$horse (53) errors, but fewer. On cartoon, DINOv2 recognizes only 74\% of the horses (41 predicted as dog, 24 as giraffe), which explains most of its 6-point gap to CLIP on that domain. On art, CLIP's main error is the class person, spread over dog, guitar, horse and house.
 
-The two backbones differ sharply in calibration. DINOv2's linear probe is well calibrated (ECE 2.0\%), whereas CLIP's is strongly \emph{under}-confident: its mean confidence is 68--82\% while its accuracy is 92--99\%, giving an ECE of 21\%. The most likely cause is that, with the same classifier learning rate, the small-norm CLIP embedding produces small logits, so the softmax stays flat even when the prediction is correct. Accuracy alone therefore hides that CLIP's confidence scores are not reliable on the unseen domains, a point that Milestone~3 investigates further. Adapting the backbone changes this picture: with LoRA, DINOv2 becomes over-confident on sketch (mean confidence 95\% for 86\% accuracy, ECE 9.0\% against 2.5\% for the linear probe) and collapses many animals onto the class horse (160 dogs and 142 giraffes). \todo{CLIP LoRA and full fine-tuning.}
+The two backbones differ sharply in calibration. DINOv2's linear probe is well calibrated (ECE 2.0\%), whereas CLIP's is strongly \emph{under}-confident: its mean confidence is 68--82\% while its accuracy is 92--99\%, giving an ECE of 21\%. The most likely cause is that, with the same classifier learning rate, the small-norm CLIP embedding produces small logits, so the softmax stays flat even when the prediction is correct. Accuracy alone therefore hides that CLIP's confidence scores are not reliable on the unseen domains, a point that Milestone~3 investigates further. Adapting the backbone changes this picture: with LoRA, DINOv2 becomes over-confident on sketch (mean confidence 95\% for 86\% accuracy, ECE 9.0\% against 2.5\% for the linear probe) and collapses many animals onto the class horse (160 dogs and 142 giraffes). The same happens with full fine-tuning: on sketch, DINOv2 labels 161 giraffes and 153 dogs as horses (only 61\% of the dogs are correct) with a mean confidence of 93\% for 85\% accuracy (ECE 8.4\%), and CLIP 107 giraffes and 71 dogs (ECE 6.2\%). On CLIP, by contrast, both LoRA and full fine-tuning remove the under-confidence of the linear probe (ECE 1.8\% and 2.5\%): once the backbone is trained, the logits grow and the confidence follows the accuracy on art, cartoon and photo (ECE 0.5--1.7\%). LoRA on CLIP also spreads its sketch errors evenly instead of collapsing onto horse (45 horses as dogs, 44 giraffes as horses, 43 giraffes as dogs), but it is still over-confident there (97\% confidence for 92\% accuracy, ECE 5.0\%). In summary, every method that trains the backbone becomes over-confident on sketch, and only DINOv2's linear probe stays calibrated there (ECE 2.5\%).
 
 \section{Milestone 3: Research Question}\label{sec:m3}
 \todo{Question, method, main experiment with at least 3 random seeds (mean $\pm$ std), model selection and every hyperparameter (e.g.\ WiSE-FT mixing coefficient, temperature) chosen on training-domain validation only, test domain used only for the final evaluation; answer to the question.}

@@ -15,7 +15,7 @@
 | Part | Folder | Status |
 |---|---|---|
 | Milestone 1 – Reproduce | `Milestone_1/` | done: 84.9 vs. 85.5 in the paper (seed 0) |
-| Milestone 2 – Improve | `Milestone_2/` | notebooks ready, runs to do; protocol and experiment log in its README |
+| Milestone 2 – Improve | `Milestone_2/` | all 24 runs done (best: CLIP + LoRA, 97.1); `M2_results.ipynb` (final table, CLIP zero-shot) still to run; protocol and experiment log in its README |
 | Milestone 3 – Research Contribution | `Milestone_3/` | after Milestone 2 |
 | Final report (IEEE 2-column, max 6 pages) | `Report/` | skeleton ready |
 

@@ -79,9 +79,9 @@ Every experiment of Milestone 2, including the early ones that are no longer par
 | E10 | 14 Oct 2026 | `M2_run_lp_dinov2` | 0 | 94.5 (A 97.8, C 92.4, P 99.9, S 87.7) | done; ECE 2.0%; ~5.5 min/run, 1.4 GB; matches `collect_results`; −0.6 vs E1 (run-to-run variation) |
 | E11 | 14 Oct 2026 | `M2_run_lp_clip` | 0 | 96.7 (A 96.8, C 98.5, P 99.4, S 92.1) | done; ECE 21.0% (under-confident); ~5 min/run, 1.3 GB; matches `collect_results`; +0.2 vs E2 |
 | E12 | 14 Oct 2026 | `M2_run_lora_dinov2` | 0 | 94.5 (A 96.2, C 95.6, P 100.0, S 86.4) | done; same average as the linear probe (C +3.2, A −1.6, S −1.3); ECE 3.4% but over-confident on sketch (ECE 9.0%); ~7.8 min/run, 10.6 GB; best step 300–1200 |
-| E13 | | `M2_run_lora_clip` | 0 | | to run |
-| E14 | | `M2_run_fullft_dinov2` | 0 | | to run |
-| E15 | | `M2_run_fullft_clip` | 0 | | to run |
+| E13 | 14 Oct 2026 | `M2_run_lora_clip` | 0 | 97.1 (A 98.5, C 97.9, P 99.7, S 92.4) | done; best of Milestone 2, +0.4 vs the linear probe (A +1.7, C −0.6); fixes the linear probe's under-confidence (ECE 21.0% → 1.8%), sketch ECE 5.0%; ~6.2 min/run, 8.9 GB; best step 300–1499 (median 600); matches `collect_results` |
+| E14 | 15 Oct 2026 | `M2_run_fullft_dinov2` | 0 | 93.5 (A 96.6, C 93.0, P 99.9, S 84.8) | done; −1.0 vs the linear probe, mostly sketch (−2.9); on sketch the test accuracy swings between 74.4 and 84.8 across checkpoints while the validation accuracy stays at 98.5–99.6 (best step 300); over-confident on sketch (ECE 8.4%); ~8.0 min/run, 17.1 GB; matches `collect_results` (oracle 91.9) |
+| E15 | 15 Oct 2026 | `M2_run_fullft_clip` | 0 | 95.4 (A 96.6, C 96.3, P 99.0, S 89.6) | done; −1.3 vs the linear probe, −1.7 vs LoRA, mostly sketch (−2.5 vs LP); sketch test accuracy 79.0–91.0 across checkpoints, art drops to 90.1 at the last step; ECE 2.5% (sketch 6.2%); ~6.9 min/run, 12.8 GB; matches `collect_results` (oracle 94.2) |
 | E16 | | CLIP zero-shot (`M2_results`, no training) | – | | to run |
 | E17 | | optional: `dinov2_cls` ablation (in `M2_run_lp_dinov2`) | 0 | | optional |
 

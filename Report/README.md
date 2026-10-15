@@ -2,7 +2,7 @@
 
 IEEE 2-column conference format, **at most 6 pages** (course requirement).
 
-- `main.tex`: the report draft (currently 3 pages). Written with real results: Milestone 1, the linear probes of Milestone 2 (DINOv2 94.5, CLIP 96.7), error analysis and calibration. Red `[TODO]` markers and red dashes show what is still missing: LoRA and full fine-tuning results, Milestone 3, conclusion.
+- `main.tex`: the report draft (currently 4 pages). Written with real results: Milestone 1 and all of Milestone 2 (linear probe, LoRA and full fine-tuning on DINOv2 and CLIP: Table II, Fig. 1, cost, error analysis and calibration). Red `[TODO]` markers show what is still missing: Milestone 3, conclusion, last sentence of the abstract and of the contributions.
 - `refs.bib`: DomainBed, PACS, DINOv2, CLIP, LoRA, WiSE-FT.
 
 ## Compile
@@ -12,4 +12,4 @@ IEEE 2-column conference format, **at most 6 pages** (course requirement).
 
 ## Where the numbers come from
 
-Every number in the report comes from the executed notebooks in `Milestone_1/` and `Milestone_2/` (the `RESULT` lines and the official `collect_results` output) and from the experiment log in `Milestone_2/README.md`. When the remaining Milestone 2 runs finish, fill Table II, Fig. 1 and the TODO paragraphs from `M2_results.ipynb`.
+Every number in the report comes from the executed notebooks in `Milestone_1/` and `Milestone_2/` (the `RESULT` lines and the official `collect_results` output) and from the experiment log in `Milestone_2/README.md`. The training-curve numbers in the full fine-tuning paragraph (sketch accuracy per checkpoint) come from the DomainBed log printed in section 6 of each run notebook.
