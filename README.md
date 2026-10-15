@@ -10,7 +10,7 @@
 
 ## Project Level and Status
 
-**Target level: Option B – Advanced Project** (Milestones 1, 2 and 3) – *to be confirmed by the team.*
+**Target level: Option B – Advanced Project** (Milestones 1, 2 and 3) – confirmed by the team.
 
 | Part | Folder | Status |
 |---|---|---|
